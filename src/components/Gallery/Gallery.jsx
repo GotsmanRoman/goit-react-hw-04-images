@@ -38,7 +38,23 @@ function Gallery() {
 
   useEffect(() => {
     if (query === '') return;
-    getImages();
+    else {
+      const getImages = async () => {
+        toggleLoading(true);
+        const resultAPI = await fetchAPI(query, page, perPage);
+
+        const responseParsed = await isResponseOk(resultAPI);
+        if (responseParsed !== false) {
+          toggleLoading(false);
+          setArray(prevValue => [...prevValue, ...responseParsed.hits]);
+          setTotalResultQuantity(responseParsed.totalHits);
+          setCurrentLoadedQuantity(
+            prevValue => prevValue + responseParsed.hits.length
+          );
+        }
+      };
+      getImages();
+    }
   }, [query, page]);
 
   const isResponseOk = async response => {
@@ -53,7 +69,7 @@ function Gallery() {
   };
 
   const handleMore = async () => {
-    setPage(page + 1);
+    setPage(prevPage => prevPage + 1);
   };
   const handlerFormSubmit = search => {
     setQuery(search);
@@ -61,20 +77,6 @@ function Gallery() {
     setPage(1);
     toggleLoading(false);
     setCurrentLoadedQuantity(0);
-  };
-  const getImages = async () => {
-    toggleLoading(true);
-    const resultAPI = await fetchAPI(query, page, perPage);
-
-    const responseParsed = await isResponseOk(resultAPI);
-    if (responseParsed !== false) {
-      toggleLoading(false);
-      setArray([...array, ...responseParsed.hits]);
-      setTotalResultQuantity(responseParsed.totalHits);
-      setCurrentLoadedQuantity(
-        currentLoadedQuantity + responseParsed.hits.length
-      );
-    }
   };
 
   const toggleModal = (event, currentElement) => {
